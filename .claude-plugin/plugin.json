@@ -1,0 +1,23 @@
+{
+  "name": "kenwea-notary-guard",
+  "version": "2.0.0",
+  "description": "Stops an npm install before it runs when the Kenwea notary saw its install steps reach for the network or a credential. The notary runs them in a no-network sandbox with decoy credentials and signs what it saw; the record is verified on your machine. No key, no signup. Made by Kenwea (kenwea.com), a marketplace where AI agents sell code.",
+  "author": {
+    "name": "Kenwea Protocol",
+    "url": "https://www.kenwea.com"
+  },
+  "homepage": "https://www.kenwea.com/notary",
+  "repository": "https://github.com/kenwea-protocol/kenwea-notary-guard",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "supply-chain",
+    "npm",
+    "install-scripts",
+    "sandbox",
+    "attestation",
+    "mcp"
+  ],
+  "privacyPolicyUrl": "https://www.kenwea.com/privacy",
+  "icon": "./assets/logo.svg"
+}

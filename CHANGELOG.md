@@ -1,0 +1,118 @@
+# Changelog
+
+## 2.0.0 (2026-11-14)
+
+The plugin is now kenwea-notary-guard, in its own repository, kenwea-protocol/kenwea-notary-guard. Anthropic's plugin directory refused 1.7.4 and 1.8.0: it takes hooks and scripts only from verified organizations, and Kenwea is not one, so the directory kept serving 1.3.0 to everyone who installed from it. The hook is what stops an install, so it could not be dropped from this plugin. The directory now gets kenwea-notary from kenwea-protocol/kenwea-claude-plugin, with the MCP tools and a skill and no hook. If you installed kenwea-notary from that repository's marketplace to get the guard, install this one instead:
+
+```
+/plugin marketplace add kenwea-protocol/kenwea-notary-guard
+/plugin install kenwea-notary-guard@kenwea-guard
+```
+
+Each package's line now ends with the address of its record on kenwea.com. The notary now keeps every answer for a registry package as a public record, the way a check from its web page already was, and the hook passes on the link the notary returns. Only a kenwea.com record page is used, since the link sits beside the signed record and not inside it.
+
+README markers: 25 claims, 13 descriptions.
+
+## 1.8.0 (2026-11-12)
+
+A record whose signature verified and whose level gave no reason to ask could still hold something worth a look in its own fields: an import that failed for a reason the record does not explain, a step that looked for a program and did not find it, a trace that was cut, or a dependency tree that was not complete. The note never mentioned them. nx 24.0.5 is the case: its record is quiet and approved, while its import failed and one of its steps looked for git. The note now says how many such things the record holds and what they are, on the package's own line, or on a line of its own when the package runs nothing at install and would otherwise get no line at all. The list is read from the signed facts only, so anyone holding the same record gets the same list. A load that failed because the entry is a stylesheet or because the code expects a browser is already explained by the record and is not counted, so font packages stay silent. The record's format does not change.
+
+The hook runs `@kenwea/mcp` 0.8.0 instead of 0.7.3. That version prints the same list in its own output as "look at", and when both the registry's integrity hash and the record's sha256 fail to match a download, it now names both rather than only the first.
+
+README markers: 24 claims, 11 descriptions.
+
+From vina, yuigui, johnnybucks, trustlessmolty and hobosentinel on Moltbook: vina described a clean verification hiding an odd observation, yuigui proposed putting a count on the line before changing the record's format, and lilt asked for both hash failures to be named.
+
+## 1.7.4 (2026-11-05)
+
+Since 1.7.3 a block of the README marked as a claim or as description was checked once and then trusted: a sentence with a version number added to it later passed, because the block was already marked. Every marker now carries a short hash of its block's text, and the test fails when the block changes until the new hash is written into the marker, so the edited block goes back in front of review. Case and whitespace are ignored, so reflowing a paragraph is not an edit.
+
+A fall in the README's claim count used to pass with any reason after "Fewer claims because". The entry must now name each dropped claim by its id, with a reason for each, as `Claims dropped: id (why); id (why).`, and the test fails when a named id is still claimed or fewer ids are named than were dropped. It cannot judge whether a reason is a good one; it makes the reviewer see which promise went.
+
+Two of the limits under "What a check does not tell you" are now shown as known misses in the notary's docker suite: code that runs only when your app calls it, and an install step that acts only under one particular parent, as @scarf/scarf does. Each has a fixture the notary does not catch, a test that its record stays quiet, and a twin without the condition that is caught, so the quiet record is the limit and not a broken fixture. If a later checker starts catching one, its test fails and the sentence is reread. The third limit, a script that notices it is being watched, stays stated and not demonstrated, because a fixture for it would be a way to evade the sandbox.
+
+README markers: 23 claims, 11 descriptions.
+
+From marginalia_claude and yuigui on Moltbook: marginalia_claude pointed out that a marked block could be edited unseen, and yuigui that "consolidated" would pass as a reason. marginalia_claude also suggested the known-miss fixtures.
+
+## 1.7.3 (2026-11-04)
+
+The README said the stand-in network accepts connections on ports 80, 443, 8080 and 8443 and that HTTPS is never decrypted. Neither has been true for a while: since 17 October it accepts every TCP connection, on any port and straight to any IP address, and since 4 November it reads HTTPS in full when the install step accepts its own certificate authority, which the sandbox tells steps to trust. The README and the skill now say so.
+
+The claim test from 1.7.2 only checked sentences someone had marked, and nobody had marked that one. Now every paragraph, list item or table row of the README holding a number, a code span, an environment variable, or the word before, unless, never or always must carry a claim marker or a description marker, and the test lists the ones that carry neither. Its first run found the sentence above and five claims about the hook itself that had no test: that it does nothing unless the command installs named packages, that a name must pass the whitelist, that only the name reaches the check, that it writes no file, and that the plugin adds the MCP server and the skill. A new test runs the hook as Claude Code does, with a stand-in `npx` that records what it was handed, and shows the first four; it checks what the hook passes to `@kenwea/mcp`, not what `@kenwea/mcp` sends.
+
+So that the README cannot pass by saying less, this file now records how many markers it carries, and the test fails when the count differs from the README's, or when the claims fall without a reason given here.
+
+README markers: 23 claims, 9 descriptions.
+
+From marginalia_claude and yuigui on Moltbook: marginalia_claude proposed flagging every sentence with a number, code or an absolute word unless it is marked, and yuigui pointed out that a claim test rewards vaguer sentences and asked for the count.
+
+## 1.7.2 (2026-11-04)
+
+The README said two things that had stopped being true. The hook's files were "91 lines" and "213 lines"; they are 114 and 312. And the MCP server it adds was listed with three tools; it has five, the lockfile and tool-definition checks among them. Both are fixed, and the README now describes the server's tools instead of listing names that go out of date.
+
+So that this does not happen again quietly, each sentence in the README that says what the guard does carries an invisible marker, and the test that shows that behaviour names the same marker. A new test fails when a claim has no test, when a test names a claim the README no longer makes, when a line count or the `@kenwea/mcp` version named in the README or the skill differs from the files, or when the number of packages checked per command differs from the README's. The guard's behaviour is unchanged.
+
+From marginalia_claude on Moltbook, who suggested giving README claims an id and a test.
+
+## 1.7.1 (2026-11-02)
+
+With permissions bypassed, every question this guard asked was let through. We measured it on 2 November with `claude -p` and a test hook: with `--dangerously-skip-permissions`, a hook that answers `ask` let the command run without asking anyone, and one that answers `deny` stopped it. Without bypass both stopped it. So until now, in a session with permissions bypassed, an install step that reached for the network or a record that did not verify was installed with no word to you.
+
+The guard now answers `deny` where nobody is asked: in CI (detected as in 1.7.0), and in sessions in `bypassPermissions` or `dontAsk` mode, which the hook reads from the `permission_mode` field Claude Code passes it. The message says the install was stopped because nobody was there to answer. When the cause is on our side, the notary unreachable or its hourly limit reached, it says so, so a stopped pipeline does not read as a fault in the package. `KENWEA_GUARD_STRICT=0` still lets through installs that could not be checked; it does not let through findings. With permissions bypassed on your own machine, an install that could not be checked goes ahead with a note, as before. In a session that asks you, nothing changes.
+
+From marginalia_claude and agenthaven on Moltbook, who found the `permission_mode` field in the documentation and asked us to test it rather than trust it.
+
+## 1.7.0 (2026-11-01)
+
+In CI the guard now stops an install it could not check. Until now, when the notary could not be reached, its hourly limit was hit, or its key list could not be read, the install went ahead with a note, everywhere. That is still what happens on your own machine. In CI nobody reads the note, so the guard is strict there, as it has been with `KENWEA_GUARD_STRICT=1`: it asks, and a headless Claude cannot answer, so the install does not run. A run counts as CI when `CI` is set to anything but `false` or `0`, or when `GITHUB_ACTIONS`, `GITLAB_CI`, `BUILDKITE`, `CIRCLECI`, `TRAVIS`, `JENKINS_URL`, `TF_BUILD`, `BITBUCKET_BUILD_NUMBER`, `CODEBUILD_BUILD_ID`, `TEAMCITY_VERSION`, `DRONE`, `SEMAPHORE`, `APPVEYOR` or `BUILD_ID_GCB` is set. The message starts `Kenwea could not check this install, and this looks like CI (GITHUB_ACTIONS is set)` and says that `KENWEA_GUARD_STRICT=0` lets such installs go ahead. `KENWEA_GUARD_STRICT=1` still turns strict mode on anywhere. A checked install is answered the same way in CI as before. The hook still runs `@kenwea/mcp` 0.7.3.
+
+Asked for on Moltbook by agenthaven, who pointed out that anyone able to block Kenwea's key list could turn a forged record into a note.
+
+## 1.6.1 (2026-10-31)
+
+What the hook does when Kenwea is down was measured on 31 October against stand-in servers, and fixed where it fell short. The install was never held up, but it could be slow, and in one case you were asked a question you should not have been.
+
+When the notary accepted a connection and never answered, each install waited about 155 seconds before going ahead. It now gives up within about 15 seconds, because `@kenwea/mcp` 0.7.3 treats a silent `initialize` as no answer. A refused connection still takes under a second, and an address that drops packets about 11 seconds.
+
+When the notary answered but Kenwea's published key list could not be read, you were asked as if the record did not verify, the same question a forged or revoked record gets. The install now goes ahead with the note `no Kenwea record yet (Kenwea's published keys could not be read, so its record could not be checked; the install went ahead)`. A record that does not verify against keys that were read is still asked about.
+
+On Windows the hook's own 140 second limit did not stop the check, because ending the shell left the `npx` and `node` under it running. The whole process tree is now ended, and the note says `the check did not finish within 140 s`.
+
+Nothing else changes. The hook runs `@kenwea/mcp` 0.7.3 instead of 0.7.2.
+
+## 1.6.0 (2026-10-29)
+
+The notary now compares a version with the previous one using its signed records of both versions, in addition to the install steps the registry lists. When an install step appears in the dependency tree that the record of the previous version does not show, you are asked first, for example `x@2.0.0: compared with 1.9.0, new install steps in its dependencies: some-dep postinstall, which our record of 1.9.0 does not show`. A new host or credential file is said beside the answer as context: the version is already asked about for it through its own record, and an earlier run can differ for the sandbox's reasons (puppeteer 25.15.0 skipped its download in our sandbox, so 25.16.0 looked new). A difference between two records made by different checker versions is never a reason to ask, and the note says so. Hosts that one run of the same install code reached and another did not are left out. Nothing else changes, and the hook still runs `@kenwea/mcp` 0.7.2.
+
+## 1.5.0 (2026-10-26)
+
+The note "not checked" read like an alarm, or like something was wrong with the package, and for a check that did run it was not even true. The note now says what happened. When the notary could not be reached or its hourly limit was hit, it says `no Kenwea record yet (the notary could not be reached; the install went ahead)`. When the check ran but could not see what runs at install, it says `checked, but the result is inconclusive` with the reason. Errors are said in plain words instead of `check failed: fetch failed`. With `KENWEA_GUARD_STRICT=1` and no record, the question you are asked now starts "Kenwea could not check this install" instead of saying it was checked and signed. What gets asked and what goes ahead is unchanged.
+
+## 1.4.0 (2026-10-25)
+
+A package with no install step of its own, whose dependency runs one, was checked with its whole tree but reported as "not checked". It now says which step ran in its dependencies and what it did, for example `eslint-config-next@15.5.27: nothing of its own runs at install; unrs-resolver@1.12.2 postinstall in its dependencies ran, finished and touched nothing we watch`. When such a step reaches for the network or a credential you are still asked first, and the message names the dependency's step instead of saying the package's own step did it. The hook now runs `@kenwea/mcp` 0.7.2 instead of 0.4.0; its output for a check is the same.
+
+## 1.3.0 (2026-10-16)
+
+The sandbox now has a stand-in network inside it. It answers every lookup and accepts connections on ports 80, 443, 8080 and 8443, so a record says what an install step sent, not only that it tried: plain HTTP in full, HTTPS by server name and size (never decrypted), and any decoy credential a request carried. The note Claude shows includes what was sent.
+
+## 1.2.0 (2026-10-15)
+
+Install steps are traced with eBPF from the host's kernel instead of strace, so they run at normal speed and code with a short timer of its own behaves as it would on your machine. The package is installed with its whole dependency tree, every install step in the tree runs, and the package is loaded once after the install, as an application would load it.
+
+## 1.1.0 (2026-10-15)
+
+Decoy credentials (an npm token, a GitHub token, AWS keys, an SSH key and CI variables) sit where a developer machine keeps real ones. You are asked before the install when a step reads or tries to send one, and when a new version runs something at install that the previous version did not.
+
+## 1.0.2 (2026-10-15)
+
+The decision to ask, note or stay quiet reads the reason code inside the signed record, not the unsigned copy beside it.
+
+## 1.0.1 (2026-10-10)
+
+A plain SVG icon and a privacy policy link.
+
+## 1.0.0 (2026-10-10)
+
+First release: a hook that checks npm packages before Claude installs them, the `kenwea-notary` MCP server, and a skill that tells Claude how to read a record.

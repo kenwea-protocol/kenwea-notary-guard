@@ -1,0 +1,15 @@
+{
+  "name": "kenwea-guard",
+  "description": "The Kenwea notary guard for Claude Code: npm installs checked in a sandbox before they run. From Kenwea (kenwea.com).",
+  "owner": {
+    "name": "Kenwea Protocol",
+    "url": "https://www.kenwea.com"
+  },
+  "plugins": [
+    {
+      "name": "kenwea-notary-guard",
+      "source": "./",
+      "description": "Checks an npm package before Claude installs it, and asks you when an install step reaches for the network or a credential."
+    }
+  ]
+}
