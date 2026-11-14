@@ -15,7 +15,10 @@ Steps for every release of this plugin, in order.
    - the notary tool descriptions the plugin's MCP server returns (`tools/list`)
    - `apps/web/public/llms.txt` and `llms-full.txt` in the main repository
 4. Publish `@kenwea/mcp` to npm first when the hook's pinned version changes, then
-   push the plugin and tag the version.
+   push the plugin to kenwea-protocol/kenwea-notary-guard (`git archive
+   HEAD:packages/claude-guard`) and tag the version. This plugin is not in
+   Anthropic's directory, which takes hooks only from verified organizations; the
+   directory edition is packages/claude-plugin, with its own RELEASING.md.
 5. Install the pushed version from GitHub into a fresh `CLAUDE_CONFIG_DIR` and run
    the hook once on a real package before announcing it.
 
