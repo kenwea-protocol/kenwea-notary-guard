@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { decide, parseInstalls, registrySpec, changedBehavior, guardMode, oddFields } from "../scripts/lib.mjs";
+import { existsSync } from "node:fs";
+
+import { decide, parseInstalls, registrySpec, changedBehavior, guardMode, oddFields, ODD_RULE } from "../scripts/lib.mjs";
 
 const specs = (cmd) => parseInstalls(cmd).flatMap((i) => i.specs);
 
@@ -235,7 +237,7 @@ test("a quiet record whose import failed and whose step missed a program says so
     load: { ran: true, exitCode: 1, observed: { ...quietObs, missing: ["git"] } } };
   const d = decide([{ spec: "nx@24.0.5", code: 0, result: signed(p) }]);
   assert.equal(d.decision, "allow");
-  assert.match(d.note, /nx@24\.0\.5: runs postinstall at install; it finished and touched nothing we watch .*; the record also has 2 things to look at: load failed \(it exited 1\); a step looked for git and did not find it/);
+  assert.match(d.note, /nx@24\.0\.5: runs postinstall at install; it finished and touched nothing we watch .*; the record also has 2 things to look at \(rule odd-1\): load failed \(it exited 1\); a step looked for git and did not find it/);
 });
 
 test("a package that runs nothing, with a failed import of unknown cause, is no longer silent", () => {
@@ -243,7 +245,7 @@ test("a package that runs nothing, with a failed import of unknown cause, is no 
     phases: [{ name: "installSteps", status: "skipped", cause: "it declares no install step" }, { name: "load", status: "failed", cause: "it exited 1; Node said: boom" }] };
   const d = decide([{ spec: "x@1.0.0", code: 0, result: signed(p) }]);
   assert.equal(d.decision, "allow");
-  assert.match(d.note, /x@1\.0\.0: nothing of its own runs at install, but the record also has one thing to look at: load failed \(it exited 1\)/);
+  assert.match(d.note, /x@1\.0\.0: nothing of its own runs at install, but the record also has one thing to look at \(rule odd-1\): load failed \(it exited 1\)/);
 });
 
 // claim: silent-nothing-runs, note-odd
@@ -266,7 +268,7 @@ test("a question about the network carries the odd list too", () => {
     phases: [{ name: "installSteps", status: "completed" }] };
   const d = decide([{ spec: "z@1.0.0", code: 0, result: signed(p) }]);
   assert.equal(d.decision, "ask");
-  assert.match(d.reason, /z@1\.0\.0: its install step tried to reach the network \(example\.org\); the record also has one thing to look at: the trace was cut, so it may be incomplete/);
+  assert.match(d.reason, /z@1\.0\.0: its install step tried to reach the network \(example\.org\); the record also has one thing to look at \(rule odd-1\): the trace was cut, so it may be incomplete/);
 });
 
 // claim: record-link
@@ -283,4 +285,25 @@ test("a package's line ends with the page of its record, and silence stays silen
     const d2 = decide([{ spec: "core-js", code: 0, result: rec({ installSteps: ["postinstall"], record: { recordUrl: bad } }) }]);
     assert.doesNotMatch(d2.note, /record:/, bad);
   }
+});
+
+// 2.1.0: the hook and @kenwea/mcp must give the same count under the same rule
+// name for the same record. In the monorepo the two copies are compared on
+// every shape of item; the exported plugin repository has no sibling package,
+// so the comparison is skipped there.
+const bridgeOdd = new URL("../../mcp-bridge/src/odd.js", import.meta.url);
+test("the guard's odd rule is @kenwea/mcp's, name and count", { skip: !existsSync(bridgeOdd) && "no @kenwea/mcp beside this plugin" }, async () => {
+  const bridge = await import(bridgeOdd.href);
+  assert.equal(ODD_RULE, bridge.ODD_RULE);
+  const ok = (name) => ({ name, status: "completed" });
+  const records = [
+    null, {}, { phases: "no" },
+    { phases: [ok("unpack"), { name: "load", status: "failed", cause: "it exited 1; many libraries" }], observed: { missing: ["git"] }, load: { observed: { missing: ["git", "make"] } } },
+    { phases: [{ name: "load", status: "failed", cause: "it exited 1 because its entry is a .css file" }] },
+    { phases: [{ name: "load", status: "failed", cause: "it exited 1 because it expects a browser" }] },
+    { phases: [{ name: "installSteps", status: "blocked", cause: "x".repeat(120) }, { name: "load", status: "not_reached", blockedBy: "installSteps" }] },
+    { phases: [{ name: "imports", status: "not_reached" }], observed: { truncated: true }, sandbox: { traceLost: 4 }, dependencies: { complete: false } },
+    { load: { observed: { truncated: true } }, sandbox: { traceLost: 0 }, dependencies: { complete: true } },
+  ];
+  for (const f of records) assert.deepEqual(oddFields(f), bridge.oddFields(f), JSON.stringify(f));
 });

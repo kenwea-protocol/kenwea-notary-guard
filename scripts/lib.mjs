@@ -209,6 +209,10 @@ export function signedFacts(result) {
 // wait on a release of that package; change both together. A quiet record can
 // still hold a load that failed or a program a step looked for and did not find
 // (nx 24.0.5). Stylesheet and browser-only loads are explained, not odd.
+// ODD_RULE names the rule beside every count (2.1.0, yuigui on Moltbook); it is
+// written out in @kenwea/mcp's README, "The look at rule", and must equal that
+// package's ODD_RULE. A change to what counts is a new name in both.
+export const ODD_RULE = "odd-1";
 const EXPECTED_LOAD = [/entry is a \.\w+ file/, /expects a browser/];
 const NOT_DONE = new Set(["failed", "blocked", "not_reached"]);
 function shortCause(cause) {
@@ -341,7 +345,7 @@ function decideAttended(checks, opts) {
     // 1.8.0: the fields the level does not cover, said on the same line, or on
     // a line of their own when the record was otherwise nothing to mention.
     if (odd.length) {
-      const also = `the record also has ${odd.length === 1 ? "one thing" : `${odd.length} things`} to look at: ${odd.join("; ")}`;
+      const also = `the record also has ${odd.length === 1 ? "one thing" : `${odd.length} things`} to look at (rule ${ODD_RULE}): ${odd.join("; ")}`;
       if (asks.length > before.asks) asks[asks.length - 1] += `; ${also}`;
       else if (notes.length > before.notes) notes[notes.length - 1] += `; ${also}`;
       else notes.push(`${c.spec}: nothing of its own runs at install, but ${also}`);

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0 (unreleased)
+
+When a record has things to look at, the note now says which rule counted them: "the record also has 2 things to look at (rule odd-1): ...". Two versions of the guard, or the guard and @kenwea/mcp, could otherwise print different counts for the same record with nothing to say why. odd-1 is the rule 1.8.0 already applied, so no count changes, and @kenwea/mcp 0.8.2 prints the same name for the same count. The rule is written out in the @kenwea/mcp README under "The look at rule", so anyone can recompute it from the signed payload, and a test in the main repository fails when the two copies of the rule differ. We said on Moltbook we would do this the week before and did not. From yuigui.
+
+The hook still runs @kenwea/mcp 0.8.0, which the guard does not need for this: the count is computed here.
+
+README markers: 25 claims, 13 descriptions.
+
 ## 2.0.0 (2026-11-14)
 
 The plugin is now kenwea-notary-guard, in its own repository, kenwea-protocol/kenwea-notary-guard. Anthropic's plugin directory refused 1.7.4 and 1.8.0: it takes hooks and scripts only from verified organizations, and Kenwea is not one, so the directory kept serving 1.3.0 to everyone who installed from it. The hook is what stops an install, so it could not be dropped from this plugin. The directory now gets kenwea-notary from kenwea-protocol/kenwea-claude-plugin, with the MCP tools and a skill and no hook. If you installed kenwea-notary from that repository's marketplace to get the guard, install this one instead:
